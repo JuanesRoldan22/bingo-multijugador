@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bingo Multijugador</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        .carton { display: inline-block; margin: 20px; padding: 10px; border: 2px solid black; }
+        table { border-collapse: collapse; margin: auto; }
+        th, td { border: 2px solid black; padding: 15px; font-size: 20px; text-align: center; }
+        .marked { background-color: green; color: white; font-weight: bold; }
+        #numero-extraido { font-size: 24px; font-weight: bold; color: red; margin-top: 20px; }
+
+        /* Estilos para el mensaje de ganador */
+        #winner-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+        }
+        #winner-box {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(255, 255, 0, 0.9);
+            text-align: center;
+            font-size: 24px;
+            color: #ff9800;
+            animation: fadeIn 1s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        #close-btn {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background: #ff9800;
+            color: white;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎉 Bingo Multijugador 🎉</h1>
+    <button onclick="extraerNumero()">Extraer Número</button>
+    <p id="numero-extraido">Número extraído: </p>
+
+    <div id="jugadores">
+        {% for jugador, carton in jugadores.items() %}
+        <div class="carton">
+            <h2>{{ jugador }}</h2>
+            <table>
+                <tr><th>B</th><th>I</th><th>N</th><th>G</th><th>O</th></tr>
+                {% for fila in carton %}
+                <tr>
+                    {% for numero in fila %}
+                    <td class="celda">{{ numero }}</td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Modal para mostrar el ganador -->
+    <div id="winner-modal">
+        <div id="winner-box">
+            <p id="winner-message"></p>
+            <button id="close-btn" onclick="closeWinnerModal()">Cerrar</button>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script>
+        var socket = io();
+
+        function extraerNumero() {
+            socket.emit('extraer_numero');
+        }
+
+        socket.on('numero_extraido', function(data) {
+            if (data.numero !== null) {
+                document.getElementById("numero-extraido").innerText = "Número extraído: " + data.numero;
+                marcarNumero(data.numero);
+            } else {
+                document.getElementById("numero-extraido").innerText = "No quedan más números.";
+            }
+        });
+
+        function verificarGanador() {
+            socket.emit('verificar_ganador');
+        }
+
+        socket.on('ganador', function(data) {
+            if (data.ganador) {
+                alert("🎉 ¡" + data.ganador + " ha ganado el Bingo! 🎉");
+            }
+        });
+
+        function marcarNumero(numero) {
+            let celdas = document.getElementsByClassName("celda");
+            for (let celda of celdas) {
+                if (celda.innerText == numero) {
+                    celda.classList.add("marked");
+                    celda.innerText = "X";
+                }
+            }
+        }
+    </script>
+</body>
+</html>

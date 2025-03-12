@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inicio - Bingo</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        .container { margin-top: 50px; }
+        input, select { font-size: 18px; padding: 5px; }
+        button { font-size: 18px; padding: 10px 20px; margin-top: 10px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎲 Bienvenido al Bingo 🎲</h1>
+<form action="/" method="POST">
+    <label for="num_jugadores">Número de jugadores:</label>
+    <input type="number" id="num_jugadores" name="num_jugadores" min="1" max="10" value="1" required>
+    <br><br>
+    <label for="modo_juego">Modo de juego:</label>
+    <select id="modo_juego" name="modo_juego">
+        <option value="linea_horizontal">Línea Horizontal</option>
+        <option value="linea_vertical">Línea Vertical</option>
+        <option value="diagonal">Diagonal</option>
+        <option value="carton_completo">Cartón Completo</option>
+    </select>
+    <br>
+    <button type="submit">Iniciar Juego</button>
+</form>
+
+    </div>
+</body>
+</html>
