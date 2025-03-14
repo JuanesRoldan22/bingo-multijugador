@@ -1,3 +1,6 @@
+import eventlet
+eventlet.monkey_patch()  # 🔹 Aplica el parche antes de importar Flask
+
 from flask import Flask, render_template, request, session
 from flask_socketio import SocketIO, emit
 import random
@@ -40,24 +43,24 @@ def index():
 
 @socketio.on('extraer_numero')
 def extraer_numero():
-    if 'bolas' in session and session['bolas']:
-        numero = session['bolas'].pop(0)
+    with app.app_context():  # Asegura el contexto de Flask
+        if 'bolas' in session and session['bolas']:
+            numero = session['bolas'].pop(0)
 
-        # Marcar el número en cada cartón
-        jugadores = session.get('jugadores', {})
-        for jugador, carton in jugadores.items():
-            for fila in carton:
-                for i in range(5):
-                    if fila[i] == numero:
-                        fila[i] = "X"  # Marcar como X
+            jugadores = session.get('jugadores', {})
+            for jugador, carton in jugadores.items():
+                for fila in carton:
+                    for i in range(5):
+                        if fila[i] == numero:
+                            fila[i] = "X"
 
-        # Guardar cambios en la sesión
-        session['jugadores'] = jugadores
-        session.modified = True
+            session['jugadores'] = jugadores
+            session.modified = True
 
-        # Emitir el número a todos los clientes
-        emit("numero_extraido", {"numero": numero}, broadcast=True)
-        verificar_ganador()
+            emit("numero_extraido", {"numero": numero}, broadcast=True)
+
+        verificar_ganador()  # 💡 Mueve esta línea FUERA del bloque "with"
+
 
 @socketio.on('verificar_ganador')
 def verificar_ganador():
